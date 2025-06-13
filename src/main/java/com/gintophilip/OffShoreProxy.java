@@ -1,5 +1,6 @@
 package com.gintophilip;
 
+import com.gintophilip.httprequest.requestparser.HttpRequest;
 import com.gintophilip.httprequest.executor.HttpRequestExecutor;
 import com.gintophilip.httprequest.requestparser.HttpRequestParser;
 
@@ -20,7 +21,9 @@ public class OffShoreProxy {
         BufferedReader reader = null;
         BufferedWriter writer = null;
         try (ServerSocket serverSocket = new ServerSocket(this.proxyServerPort)){
+            System.out.println("[off_shore_proxy]waiting for connection from client");
             clientSocket = serverSocket.accept();
+            System.out.println("[off_shore_proxy]received connection from client");
             writer = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
             reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         } catch (IOException e) {
@@ -34,7 +37,8 @@ public class OffShoreProxy {
             try {
                 String rawRequest = readHttpRequest(reader);
                 if (rawRequest.isEmpty()) {
-                    continue; // Skip empty requests
+                    continue;
+                }else{
                 }
 
                 HttpRequest httpRequest = parseHttpRequest(rawRequest);
@@ -44,7 +48,6 @@ public class OffShoreProxy {
             } catch (IOException | RuntimeException e) {
                 System.err.println("[off_shore_proxy] Error: " + e.getMessage());
                 e.printStackTrace();
-                // Optional: break or continue depending on behavior you want
                 break;
             }
         }
@@ -55,6 +58,7 @@ public class OffShoreProxy {
         String line;
 
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            System.out.println("[off_shore_proxy]reading request line");
             requestBuilder.append(line).append("\r\n");
         }
         String request = requestBuilder.toString();
