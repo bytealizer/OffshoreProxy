@@ -1,6 +1,6 @@
 package com.gintophilip;
 
-import java.io.IOException;
+import com.gintophilip.proxy.OffShoreProxy;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.

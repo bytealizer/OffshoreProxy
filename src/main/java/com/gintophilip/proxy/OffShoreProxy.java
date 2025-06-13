@@ -1,4 +1,4 @@
-package com.gintophilip;
+package com.gintophilip.proxy;
 
 import com.gintophilip.httprequest.requestparser.HttpRequest;
 import com.gintophilip.httprequest.executor.HttpRequestExecutor;
