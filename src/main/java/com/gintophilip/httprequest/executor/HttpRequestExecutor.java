@@ -11,10 +11,7 @@ import java.nio.charset.StandardCharsets;
 
 public class HttpRequestExecutor {
 
-    private final HttpClient client;
-
     public HttpRequestExecutor() {
-        this.client = HttpClient.newHttpClient();
     }
 
     public void executeRequest(com.gintophilip.httprequest.requestparser.HttpRequest requestWrapper,Socket clientSocket) {
