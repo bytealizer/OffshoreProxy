@@ -30,7 +30,6 @@ public class OffShoreProxy {
                         start(reader, writer, clientSocket);
                     } catch (IOException e) {
                         System.err.println("[off_shore_proxy] Error handling client: " + e.getMessage());
-                        e.printStackTrace();
                     }
                 }).start();
             }
@@ -48,7 +47,7 @@ public class OffShoreProxy {
             System.out.println("[off_shore_proxy]reading request line");
             requestBuilder.append(line).append("\r\n");
         }
-        if (line == null && requestBuilder.length() == 0) {
+        if (line == null && requestBuilder.isEmpty()) {
             return null;
         }
 
@@ -78,7 +77,6 @@ public class OffShoreProxy {
 
             } catch (IOException | RuntimeException e) {
                 System.err.println("[off_shore_proxy] Error: " + e.getMessage());
-                e.printStackTrace();
                 break;
             }
         }

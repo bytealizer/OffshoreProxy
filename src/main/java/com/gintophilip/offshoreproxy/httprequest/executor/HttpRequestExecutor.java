@@ -20,7 +20,7 @@ public class HttpRequestExecutor {
             ProxyResponseHandler proxyHandler = new ProxyResponseHandler();
             proxyHandler.handleProxyResponse(clientSocket, requestWrapper);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
             rawResponse.append("Error: ").append(e.getMessage());
         }
 
@@ -231,7 +231,6 @@ public class HttpRequestExecutor {
     }
 
     private byte[] modifyResponseContentLength(byte[] fullResponse) {
-        System.out.println("content length procvess");
         String responseString = new String(fullResponse, StandardCharsets.UTF_8);
         int headerEndIndex = responseString.indexOf("\r\n\r\n");
 
@@ -259,10 +258,9 @@ public class HttpRequestExecutor {
         if (!hasContentLength) {
             modifiedHeaders.append("Content-Length: ").append(bodyLength).append("\r\n");
         }
-        System.out.println("content length ernd");
 
         // Combine headers and body
-        return (modifiedHeaders.toString() + "\r\n" + bodyPart).getBytes(StandardCharsets.UTF_8);
+        return (modifiedHeaders + "\r\n" + bodyPart).getBytes(StandardCharsets.UTF_8);
     }
 }
 

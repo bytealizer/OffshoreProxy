@@ -1,6 +1,7 @@
 package com.gintophilip.offshoreproxy.httprequest.requestparser;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.*;
 
@@ -61,7 +62,8 @@ public class HttpRequest {
 
     public String getHost() {
         try {
-            URL url = new URL(path);
+            URI uri = URI.create(path);
+            URL url = uri.toURL();
             return url.getHost();
         } catch (MalformedURLException e) {
             System.err.println("Invalid URL: " + path);
