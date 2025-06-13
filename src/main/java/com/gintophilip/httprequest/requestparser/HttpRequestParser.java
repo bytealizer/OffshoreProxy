@@ -50,6 +50,9 @@ public class HttpRequestParser {
                 request.headers.put(name, value);
             }
         }
+//        request.headers.put("Host",request.getHost());
+//        request.headers.put("User-Agent","Test Proxy");
+        request.headers.put("Accept-Encoding","gzip,deflate");
 
         // Parse Body if the method expects a body
         if (request.method.equalsIgnoreCase("POST") ||
