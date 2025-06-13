@@ -1,8 +1,8 @@
-package com.gintophilip.proxy;
+package com.gintophilip.offshoreproxy.proxy;
 
-import com.gintophilip.httprequest.requestparser.HttpRequest;
-import com.gintophilip.httprequest.executor.HttpRequestExecutor;
-import com.gintophilip.httprequest.requestparser.HttpRequestParser;
+import com.gintophilip.offshoreproxy.httprequest.requestparser.HttpRequest;
+import com.gintophilip.offshoreproxy.httprequest.executor.HttpRequestExecutor;
+import com.gintophilip.offshoreproxy.httprequest.requestparser.HttpRequestParser;
 
 import java.io.*;
 import java.net.ServerSocket;

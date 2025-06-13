@@ -1,11 +1,10 @@
-package com.gintophilip.httprequest.executor;
+package com.gintophilip.offshoreproxy.httprequest.executor;
 
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.nio.charset.StandardCharsets;
 
@@ -14,7 +13,7 @@ public class HttpRequestExecutor {
     public HttpRequestExecutor() {
     }
 
-    public void executeRequest(com.gintophilip.httprequest.requestparser.HttpRequest requestWrapper,Socket clientSocket) {
+    public void executeRequest(com.gintophilip.offshoreproxy.httprequest.requestparser.HttpRequest requestWrapper, Socket clientSocket) {
         StringBuilder rawResponse = new StringBuilder();
 
         try {
@@ -27,7 +26,7 @@ public class HttpRequestExecutor {
 
     }
 
-    public void  executeHttpsRequest(com.gintophilip.httprequest.requestparser.HttpRequest httpRequest,Socket shipProxySocket) {
+    public void  executeHttpsRequest(com.gintophilip.offshoreproxy.httprequest.requestparser.HttpRequest httpRequest, Socket shipProxySocket) {
         HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(URI.create("https://"+httpRequest.path));
 
@@ -72,7 +71,7 @@ public class HttpRequestExecutor {
 
  class ProxyResponseHandler {
 
-    public void handleProxyResponse(Socket clientSocket, com.gintophilip.httprequest.requestparser.HttpRequest requestWrapper) throws IOException {
+    public void handleProxyResponse(Socket clientSocket, com.gintophilip.offshoreproxy.httprequest.requestparser.HttpRequest requestWrapper) throws IOException {
         try {
             Socket targetSocket = new Socket(requestWrapper.getHost(), 80);
             System.out.println("connected to target");
@@ -87,7 +86,7 @@ public class HttpRequestExecutor {
         }
     }
 
-    private void sendRequestToTarget(OutputStream targetOut, com.gintophilip.httprequest.requestparser.HttpRequest requestWrapper) throws IOException {
+    private void sendRequestToTarget(OutputStream targetOut, com.gintophilip.offshoreproxy.httprequest.requestparser.HttpRequest requestWrapper) throws IOException {
         System.out.println("sending request");
         byte[] requestBytes = requestWrapper.toHttpRequest().getBytes(StandardCharsets.UTF_8);
         targetOut.write(requestBytes);

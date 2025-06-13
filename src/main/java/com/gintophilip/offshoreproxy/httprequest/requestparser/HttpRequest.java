@@ -1,4 +1,4 @@
-package com.gintophilip.httprequest.requestparser;
+package com.gintophilip.offshoreproxy.httprequest.requestparser;
 
 import java.net.MalformedURLException;
 import java.net.URL;
