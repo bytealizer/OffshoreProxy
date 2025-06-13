@@ -29,10 +29,10 @@ public class OffShoreProxy {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        start(reader,writer);
+        start(reader,writer,clientSocket);
     }
 
-    private void start(BufferedReader reader, BufferedWriter writer) {
+    private void start(BufferedReader reader, BufferedWriter writer,Socket shipProxySocket) {
         while (true) {
             try {
                 String rawRequest = readHttpRequest(reader);
@@ -42,9 +42,13 @@ public class OffShoreProxy {
                 }
 
                 HttpRequest httpRequest = parseHttpRequest(rawRequest);
-                String response = new HttpRequestExecutor().executeRequest(httpRequest);
+                if(httpRequest.method.toUpperCase().equals("CONNECT")){
+                     new HttpRequestExecutor().executeHttpsRequest(httpRequest,shipProxySocket);
+                }else {
+                   String response = new HttpRequestExecutor().executeRequest(httpRequest);
+                    sendResponse(writer, response);
+                }
 
-                sendResponse(writer, response);
             } catch (IOException | RuntimeException e) {
                 System.err.println("[off_shore_proxy] Error: " + e.getMessage());
                 e.printStackTrace();

@@ -1,6 +1,9 @@
 package com.gintophilip.httprequest.executor;
 
+import java.io.*;
+import java.net.Socket;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -71,4 +74,44 @@ public class HttpRequestExecutor {
         return rawResponse.toString();
     }
 
+    public void  executeHttpsRequest(com.gintophilip.httprequest.requestparser.HttpRequest httpRequest,Socket shipProxySocket) {
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .uri(URI.create("https://"+httpRequest.path));
+
+        String[] hostParts = httpRequest.path.split(":");
+        String host = hostParts[0];
+        int port = Integer.parseInt(hostParts[1]);
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(shipProxySocket.getInputStream()));
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(shipProxySocket.getOutputStream()));
+            Socket targetSocket = new Socket(host, port);
+            writer.write("HTTP/1.1 200 Connection Established\r\n\r\n");
+            writer.flush();
+
+            new Thread(() -> forwardData(shipProxySocket, targetSocket)).start();
+            forwardData(targetSocket, shipProxySocket);
+
+        }catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
+    }
+
+    private void forwardData(Socket inSocket, Socket outSocket) {
+        try (InputStream in = inSocket.getInputStream();
+             OutputStream out = outSocket.getOutputStream()) {
+
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = in.read(buffer)) != -1) {
+                out.write(buffer, 0, bytesRead);
+                out.flush();
+            }
+        } catch (IOException e) {
+            // socket closed
+        }
+    }
 }
