@@ -1,4 +1,4 @@
-package com.gintophilip;
+package com.gintophilip.httprequest.requestparser;
 
 import java.util.*;
 

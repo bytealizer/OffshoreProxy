@@ -1,7 +1,5 @@
 package com.gintophilip.httprequest.requestparser;
 
-import com.gintophilip.HttpRequest;
-
 import java.io.*;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
