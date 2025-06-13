@@ -155,54 +155,6 @@ public class HttpRequestExecutor {
              bodyStream = targetIn;
          }
 
-         // Handle chunked or non-chunked body
-//         if (isChunked) {
-//             System.out.println("[proxy] Detected chunked transfer encoding.");
-//
-//             InputStream in = bodyStream;
-//
-//             while (true) {
-//                 // Read chunk size line
-//                 StringBuilder chunkSizeLine = new StringBuilder();
-//                 int ch;
-//                 while ((ch = in.read()) != -1) {
-//                     if (ch == '\r') {
-//                         int next = in.read();
-//                         if (next == '\n') break;
-//                         else throw new IOException("Malformed chunk size line");
-//                     }
-//                     chunkSizeLine.append((char) ch);
-//                 }
-//
-//                 String sizeStr = chunkSizeLine.toString().trim();
-//                 int chunkSize = Integer.parseInt(sizeStr, 16);
-//
-//                 if (chunkSize == 0) {
-//                     in.read(); // \r
-//                     in.read(); // \n
-//                     break; // End of chunks
-//                 }
-//
-//                 // Read chunk data
-//                 byte[] chunk = new byte[chunkSize];
-//                 int bytesRead1 = 0;
-//                 while (bytesRead1 < chunkSize) {
-//                     int r = in.read(chunk, bytesRead1, chunkSize - bytesRead1);
-//                     if (r == -1) throw new IOException("Unexpected end of chunk data");
-//                     bytesRead1 += r;
-//                 }
-//                 clientOut.write(chunk);
-//
-//                 // Read trailing \r\n
-//                 if (in.read() != '\r' || in.read() != '\n') {
-//                     throw new IOException("Malformed chunk trailer");
-//                 }
-//             }
-//
-//         } else {
-//
-//         }
-         // Stream body normally
          if (isChunked) {
              targetSocket.setSoTimeout(10000); // 10 sec timeout for chunked encoding
              try {
