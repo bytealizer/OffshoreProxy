@@ -17,43 +17,26 @@ public class OffShoreProxy {
     public void listenAndServe(int proxyServerPort) {
         this.proxyServerPort = proxyServerPort;
 
-        Socket clientSocket = null;
-        BufferedReader reader = null;
-        BufferedWriter writer = null;
-        try (ServerSocket serverSocket = new ServerSocket(this.proxyServerPort)){
-            System.out.println("[off_shore_proxy]waiting for connection from client");
-            clientSocket = serverSocket.accept();
-            System.out.println("[off_shore_proxy]received connection from client");
-            writer = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
-            reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        start(reader,writer,clientSocket);
-    }
+        try (ServerSocket serverSocket = new ServerSocket(this.proxyServerPort)) {
+            System.out.println("[off_shore_proxy] Waiting for connections on port " + proxyServerPort);
 
-    private void start(BufferedReader reader, BufferedWriter writer,Socket shipProxySocket) {
-        while (true) {
-            try {
-                String rawRequest = readHttpRequest(reader);
-                if (rawRequest.isEmpty()) {
-                    continue;
-                }else{
-                }
-
-                HttpRequest httpRequest = parseHttpRequest(rawRequest);
-                if(httpRequest.method.toUpperCase().equals("CONNECT")){
-                     new HttpRequestExecutor().executeHttpsRequest(httpRequest,shipProxySocket);
-                }else {
-                   String response = new HttpRequestExecutor().executeRequest(httpRequest);
-                    sendResponse(writer, response);
-                }
-
-            } catch (IOException | RuntimeException e) {
-                System.err.println("[off_shore_proxy] Error: " + e.getMessage());
-                e.printStackTrace();
-                break;
+            while (true) {
+                Socket clientSocket = serverSocket.accept(); // Wait for a client
+                System.out.println("[off_shore_proxy] Received connection from client: " + clientSocket.getRemoteSocketAddress());
+                new Thread(() -> {
+                    try {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+                        start(reader, writer, clientSocket);
+                    } catch (IOException e) {
+                        System.err.println("[off_shore_proxy] Error handling client: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                }).start();
             }
+
+        } catch (IOException e) {
+            throw new RuntimeException("[off_shore_proxy] Server failed to start", e);
         }
     }
 
@@ -65,19 +48,45 @@ public class OffShoreProxy {
             System.out.println("[off_shore_proxy]reading request line");
             requestBuilder.append(line).append("\r\n");
         }
+        if (line == null && requestBuilder.length() == 0) {
+            return null;
+        }
+
         String request = requestBuilder.toString();
         System.out.println("[off_shore_proxy] Received from [ship_proxy]: " + request);
         return request;
+    }
+    private void start(BufferedReader reader, BufferedWriter writer,Socket shipProxySocket) {
+        while (true) {
+            try {
+                String rawRequest = readHttpRequest(reader);
+                if (rawRequest == null) {
+                    System.out.println("[off_shore_proxy] Client closed the connection.");
+                    break;
+                }
+                if (rawRequest.isEmpty()) {
+                    continue;
+                }else{
+                }
+
+                HttpRequest httpRequest = parseHttpRequest(rawRequest);
+                if(httpRequest.method.toUpperCase().equals("CONNECT")){
+                     new HttpRequestExecutor().executeHttpsRequest(httpRequest,shipProxySocket);
+                }else {
+                    new HttpRequestExecutor().executeRequest(httpRequest,shipProxySocket);
+                }
+
+            } catch (IOException | RuntimeException e) {
+                System.err.println("[off_shore_proxy] Error: " + e.getMessage());
+                e.printStackTrace();
+                break;
+            }
+        }
     }
 
     private HttpRequest parseHttpRequest(String rawRequest) throws IOException {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(rawRequest.getBytes(StandardCharsets.UTF_8));
         return HttpRequestParser.parse(inputStream);
-    }
-
-    private void sendResponse(BufferedWriter writer, String response) throws IOException {
-        writer.write(response);
-        writer.flush();
     }
 }
 
