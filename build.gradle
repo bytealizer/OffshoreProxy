@@ -1,7 +1,10 @@
 plugins {
     id 'java'
+    id 'application'
 }
-
+application {
+    mainClass = 'com.gintophilip.offshoreproxy.Main'
+}
 group = 'com.gintophilip'
 version = '1.0-SNAPSHOT'
 
@@ -18,3 +21,10 @@ test {
     useJUnitPlatform()
 }
 
+jar {
+    manifest {
+        attributes(
+                'Main-Class': application.mainClass.get()
+        )
+    }
+}
