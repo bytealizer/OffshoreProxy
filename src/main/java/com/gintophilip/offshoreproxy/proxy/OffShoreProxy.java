@@ -44,7 +44,6 @@ public class OffShoreProxy {
         String line;
 
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            System.out.println("[off_shore_proxy]reading request line");
             requestBuilder.append(line).append("\r\n");
         }
         if (line == null && requestBuilder.isEmpty()) {
@@ -56,6 +55,7 @@ public class OffShoreProxy {
         return request;
     }
     private void start(BufferedReader reader, BufferedWriter writer,Socket shipProxySocket) {
+        System.out.println("[off_shore_proxy] starting...");
         while (true) {
             try {
                 String rawRequest = readHttpRequest(reader);
@@ -70,7 +70,8 @@ public class OffShoreProxy {
 
                 HttpRequest httpRequest = parseHttpRequest(rawRequest);
                 if(httpRequest.method.toUpperCase().equals("CONNECT")){
-                     new HttpRequestExecutor().executeHttpsRequest(httpRequest,shipProxySocket);
+
+//                     new HttpRequestExecutor().executeHttpsRequest(httpRequest,shipProxySocket);
                 }else {
                     new HttpRequestExecutor().executeRequest(httpRequest,shipProxySocket);
                 }

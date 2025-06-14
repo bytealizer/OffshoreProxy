@@ -50,6 +50,7 @@ public class HttpRequestParser {
                 request.headers.put(name, value);
             }
         }
+        //enable gzip compression
         request.headers.put("Accept-Encoding","gzip,deflate");
 
         // Parse Body if the method expects a body

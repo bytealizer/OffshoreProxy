@@ -53,9 +53,9 @@ public class HttpRequestExecutor {
     }
 
     private void forwardData(Socket inSocket, Socket outSocket) {
-        try (InputStream in = inSocket.getInputStream();
-             OutputStream out = outSocket.getOutputStream()) {
-
+        try  {
+            InputStream in = inSocket.getInputStream();
+            OutputStream out = outSocket.getOutputStream();
             byte[] buffer = new byte[8192];
             int bytesRead;
             while ((bytesRead = in.read(buffer)) != -1) {
@@ -74,14 +74,16 @@ public class HttpRequestExecutor {
     public void handleProxyResponse(Socket clientSocket, com.gintophilip.offshoreproxy.httprequest.requestparser.HttpRequest requestWrapper) throws IOException {
         try {
             Socket targetSocket = new Socket(requestWrapper.getHost(), 80);
-            System.out.println("connected to target");
+            System.out.println("connected to target "+ targetSocket.getInetAddress().getHostName());
             InputStream targetIn = targetSocket.getInputStream();
             OutputStream targetOut = targetSocket.getOutputStream();
             OutputStream clientOut = clientSocket.getOutputStream();
             sendRequestToTarget(targetOut, requestWrapper);
-            streamResponseDirectly(targetIn,clientOut,targetSocket);
-            System.out.println("gg");
+            streamResponseDirectly(targetIn,clientOut,targetSocket,clientSocket);
+            targetSocket.close();
         }catch (Exception e){
+            System.out.println(e.getMessage());
+            e.printStackTrace();
 
         }
     }
@@ -104,9 +106,8 @@ public class HttpRequestExecutor {
          return -1;
      }
 
-     private void streamResponseDirectly(InputStream targetIn, OutputStream clientOut, Socket targetSocket) throws IOException {
-         System.out.println("[proxy] Streaming response directly to client...");
-
+     private void streamResponseDirectly(InputStream targetIn, OutputStream clientOut, Socket targetSocket,Socket clientSocket) throws IOException {
+         System.out.println("[off_shore_proxy]sending to client "+clientSocket.getInetAddress().getHostAddress()+":"+clientSocket.getPort());
          byte[] buffer = new byte[4096];
          int bytesRead=0;
          int totalBytes = 0;
@@ -128,7 +129,7 @@ public class HttpRequestExecutor {
          }
 
          if (!headersComplete) {
-             System.err.println("[proxy] Failed to read full headers");
+             System.err.println("[off_shore_proxy] Failed to read full headers");
              return;
          }
 
@@ -137,7 +138,7 @@ public class HttpRequestExecutor {
          clientOut.write(headerBytes, 0, headerEndIndex + 4);
 
          String headerStr = new String(headerBytes, 0, headerEndIndex + 4, StandardCharsets.ISO_8859_1);
-         System.out.println("[proxy] Response headers:\n" + headerStr);
+         System.out.println("[off_shore_proxy] Response headers:\n" + headerStr);
 
          boolean isChunked = headerStr.toLowerCase().contains("transfer-encoding: chunked");
          boolean isGzip = headerStr.toLowerCase().contains("content-encoding: gzip");
@@ -166,6 +167,9 @@ public class HttpRequestExecutor {
              } catch (SocketTimeoutException e) {
                  System.out.println("Read timed out, no data received for 10 seconds. Closing socket.");
                  try {
+                     String END_MARKER = "\r\nEND_OF_RESPONSE_FROM_OFF_SHORE_PROXY\r\n";
+                     clientOut.write(END_MARKER.getBytes(StandardCharsets.UTF_8));
+                     clientOut.flush();
                      targetSocket.close();
                  } catch (IOException ex) {
                      System.err.println("Error closing socket after timeout: " + ex.getMessage());
@@ -178,7 +182,7 @@ public class HttpRequestExecutor {
                  totalBytes += bytesRead;
              }
          }
-
+         System.out.println("[off_shore_proxy]sending to client "+clientSocket.getInetAddress().getHostAddress()+":"+clientSocket.getPort());
          System.out.println("[proxy] Finished streaming response. Total body bytes: " + totalBytes);
 
      }
